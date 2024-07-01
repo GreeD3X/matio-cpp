@@ -399,6 +399,74 @@ bool matioCpp::File::write(const Variable &variable, Compression compression)
     return true;
 }
 
+bool matioCpp::File::writeAppend(const Variable &variable, Compression compression, int dim)
+{
+    if (!isOpen())
+    {
+        std::cerr << "[ERROR][matioCpp::File::write] The file is not open." <<std::endl;
+        return false;
+    }
+
+    if (mode() != matioCpp::FileMode::ReadAndWrite)
+    {
+        std::cerr << "[ERROR][matioCpp::File::write] The file cannot be written." <<std::endl;
+        return false;
+    }
+
+    std::string error = m_pimpl->isVariableValid(variable);
+    if (error.size() != 0)
+    {
+        std::cerr << "[ERROR][matioCpp::File::write] " << error << std::endl;
+        return false;
+    }
+
+    SharedMatvar shallowCopy = SharedMatvar::GetMatvarShallowDuplicate(variable.toMatio()); // Shallow copy to remove const
+
+    matio_compression matioCompression =
+            (compression == matioCpp::Compression::zlib) ? matio_compression::MAT_COMPRESSION_ZLIB : matio_compression::MAT_COMPRESSION_NONE;
+
+    if (version() == matioCpp::FileVersion::MAT4)
+    {
+        switch (variable.variableType())
+        {
+        case matioCpp::VariableType::Element:
+            break;
+        case matioCpp::VariableType::Vector:
+            break;
+        case matioCpp::VariableType::MultiDimensionalArray:
+            if (variable.dimensions().size() > 2)
+            {
+                std::cerr << "[ERROR][matioCpp::File::write] A MAT4 version does not support arrays with number of dimensions greater than 2." << std::endl;
+                return false;
+            }
+            break;
+        default:
+            std::cerr << "[ERROR][matioCpp::File::write] A MAT4 supports only element, vectors or matrices." << std::endl;
+            return false;
+        }
+
+        matioCpp::ValueType valueType = variable.valueType();
+
+        if ((valueType != matioCpp::ValueType::DOUBLE) && (valueType != matioCpp::ValueType::SINGLE) && (valueType != matioCpp::ValueType::LOGICAL)
+                && (valueType != matioCpp::ValueType::UINT8) && (valueType != matioCpp::ValueType::INT32)
+                && (valueType != matioCpp::ValueType::INT16) && (valueType != matioCpp::ValueType::UINT16))
+        {
+            std::cerr << "[ERROR][matioCpp::File::write] A MAT4 supports only variables of type LOGICAL, DOUBLE, SINGLE, UINT8, UINT16, INT16 and INT32." << std::endl;
+            return false;
+        }
+    }
+
+    int success = Mat_VarWriteAppend(m_pimpl->mat_ptr, shallowCopy.get(), matioCompression, dim);
+
+    if (success)
+    {
+        std::cerr << "[ERROR][matioCpp::File::write] Failed to write the variable to the file. code: "<< success <<std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool matioCpp::File::isOpen() const
 {
     return m_pimpl->mat_ptr;

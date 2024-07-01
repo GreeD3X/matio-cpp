@@ -8,7 +8,6 @@
  * BSD-2-Clause license (https://opensource.org/licenses/BSD-2-Clause).
  */
 
-
 #include <matioCpp/ForwardDeclarations.h>
 #include <matioCpp/Variable.h>
 
@@ -25,8 +24,8 @@ class matioCpp::File
      * @param it The dereferenced value of an iterator.
      * @return The same input
      */
-    template<class input>
-    inline const input &getVariable(const input& it);
+    template <class input>
+    inline const input &getVariable(const input &it);
 
     /**
      * @brief Convert the input to a Variable.
@@ -34,11 +33,10 @@ class matioCpp::File
      * @param it The dereferenced key-value pair of an iterator.
      * @return The second element of the input
      */
-    template<class key, class input>
-    inline const input &getVariable(const std::pair<key, input>& it);
+    template <class key, class input>
+    inline const input &getVariable(const std::pair<key, input> &it);
 
 public:
-
     /**
      * @brief Default Constructor
      */
@@ -50,18 +48,18 @@ public:
      * @param mode The mode with which to open the file. By default, both reading and writing are allowed.
      * @note If the mode is ReadAndWrite, a file with the same name is created if not found
      */
-    File(const std::string& name, matioCpp::FileMode mode = matioCpp::FileMode::ReadAndWrite);
+    File(const std::string &name, matioCpp::FileMode mode = matioCpp::FileMode::ReadAndWrite);
 
     /**
      * @brief Deleted copy constructor, to avoid confusion on whether the content has been copied or not
      */
-    File(const File& other) = delete;
+    File(const File &other) = delete;
 
     /**
      * @brief Move constructor
      * @param other The other File from which the internal status has been taken.
      */
-    File(File&& other);
+    File(File &&other);
 
     /**
      * @brief Destructor
@@ -71,13 +69,13 @@ public:
     /**
      * @brief Deleted copy assignment, to avoid confusion on whether the content has been copied or not
      */
-    void operator=(const File& other) = delete;
+    void operator=(const File &other) = delete;
 
     /**
      * @brief Move assignement
      * @param other The other File from which the internal status has been taken.
      */
-    void operator=(File&& other);
+    void operator=(File &&other);
 
     /**
      * @brief Close the file
@@ -90,7 +88,7 @@ public:
      * @param mode The mode with which to open the file. By default, both reading and writing are allowed.
      * @return false in case of failure (the file does not exist, the file exist but cannot be written, ..)
      */
-    bool open(const std::string& name, matioCpp::FileMode mode = matioCpp::FileMode::ReadAndWrite);
+    bool open(const std::string &name, matioCpp::FileMode mode = matioCpp::FileMode::ReadAndWrite);
 
     /**
      * @brief Create a new file (static)
@@ -101,23 +99,23 @@ public:
      * @param header This is an optional string that is added inside the MAT file. You can view the text in a MAT-file header using the cat command on the file on UNIX.
      * @return a newly created File object. The method isOpen() returnf false if something went wrong.
      */
-    static File Create(const std::string& name,
+    static File Create(const std::string &name,
                        matioCpp::FileVersion version = matioCpp::FileVersion::Default,
-                       const std::string& header = "");
+                       const std::string &header = "");
 
     /**
      * @brief Delete the specified file
      * @param name Name of the file to delete.
      * @return True if successful, false otherwise (for example, in Windows the file will not be deleted if open).
      */
-    static bool Delete(const std::string& name);
+    static bool Delete(const std::string &name);
 
     /**
      * @brief Check if file exists and can be opened
      * @param name The name of the file to check
      * @return True if the specified file exists, false otherwise
      */
-    static bool Exists(const std::string& name);
+    static bool Exists(const std::string &name);
 
     /**
      * @brief The file name
@@ -160,7 +158,7 @@ public:
      * @return The desired Variable. The method isValid() would return false if something went wrong.
      * @note Modifying the output variable will not change the file.
      */
-    matioCpp::Variable read(const std::string& name) const;
+    matioCpp::Variable read(const std::string &name) const;
 
     /**
      * @brief Write a Variable to a file
@@ -170,6 +168,15 @@ public:
      * @return True if successful.
      */
     bool write(const Variable &variable, matioCpp::Compression compression = matioCpp::Compression::None);
+
+    /**
+     * @brief Write a Variable to a file
+     * @param variable The input variable.
+     * @param compression The compression type to be used for writing the variable.
+     * @note The it performs a shallow copy of the variable.
+     * @return True if successful.
+     */
+    bool writeAppend(const Variable &variable, matioCpp::Compression compression = matioCpp::Compression::None, int dim = 1);
 
     /**
      * @brief Write a Variable to a file in a batch
@@ -186,7 +193,6 @@ public:
      * @return True if open.
      */
     bool isOpen() const;
-
 };
 
 #include "impl/File.tpp"
